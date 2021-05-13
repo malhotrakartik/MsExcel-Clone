@@ -17,14 +17,29 @@ for (let i = 1; i <= 100; i++) {
     $("#rows").append(`<div class="row-name">${i}</div>`)
 }
 
+let cellData = [];
+
 for (let i = 1; i <= 100; i++) {
     let row = $(`<div class="cell-row"></div>`)
+    let rowArray = [];
 
     for (let j = 1; j <= 100; j++) {
-        row.append($(`                    <div id="row-${i}-col-${j}" class="input-cell" contenteditable="false"></div>
-        `))
+
+        row.append($(` <div id="row-${i}-col-${j}" class="input-cell" contenteditable="false"></div>`));
+        rowArray.push({
+            "font-family": "Noto Sans",
+            "font-size": 14,
+            "text": "",
+            "bold": false,
+            "italic": false,
+            "underlined": false,
+            "alingment": "left",
+            "color": "",
+            "bgcolor": ""
+        })
 
     }
+    cellData.push(rowArray);
     $("#cells").append(row);
 }
 
@@ -36,6 +51,7 @@ $("#cells").scroll(function (e) {
 
 $(".input-cell").dblclick(function (e) {
     $(".input-cell.selected").removeClass("selected top-selected bottom-selected right-selected left-selected");
+    $(this).addClass("selected");
     $(this).attr("contenteditable", "true");
     $(this).focus();
 })
@@ -139,7 +155,31 @@ function selectCell(ele, e, topCell, bottomCell, leftCell, rightCell) {
         $(".input-cell.selected").removeClass("selected top-selected bottom-selected right-selected left-selected");
     }
     $(ele).addClass("selected");
+    changeHeader(getRowCol(ele));
 
+}
+
+function changeHeader([rowId, colId]) {
+    let data = cellData[rowId - 1][colId - 1];
+    $(".alignment.selected").removeClass("selected");
+    $(`.alignment[data-type = ${data.alingment}]`).addClass("selected");
+   
+  addRemoveSelectFromFontStyle(data,"bold");
+  addRemoveSelectFromFontStyle(data,"italic");
+
+  addRemoveSelectFromFontStyle(data,"underlined");
+
+
+    
+}
+
+function addRemoveSelectFromFontStyle(data,property){
+    if(data[property]){
+        $(`#${property}`).addClass("selected");
+    }else{
+        $(`#${property}`).removeClass("selected");
+
+    }
 }
 
 let startCellSelected = false;
@@ -148,23 +188,26 @@ let endCell = {};
 let scrollXrStarted = false;
 let scrollXlStarted = false;
 let scrollYdStarted = false;
+let scrollYuStarted = false;
 $(".input-cell").mousemove(function (e) {
     e.preventDefault();
 
     if (e.buttons == 1) {
-        if(e.pageX > ($(window).width()) - 10 && !scrollXrStarted){
-                  scrollXR();
+        if (e.pageX > ($(window).width()) - 10 && !scrollXrStarted) {
+            scrollXR();
 
-        }else if(e.pageX < 10 && !scrollXlStarted){
+        } else if (e.pageX < 10 && !scrollXlStarted) {
             scrollXL();
         }
-        // console.log(e.pageY,$(window).height());
 
-        if(e.pageY > ($(window).height()) - 50 && !scrollYdStarted){
+        if (e.pageY > ($(window).height()) - 50 && !scrollYdStarted) {
             scrollYD();
         }
+        // else if(e.pageY < 190 && !scrollYuStarted){
+        //     scrollYU();
+        // }
 
-        
+
 
         if (!startCellSelected) {
             let [rowId, colId] = getRowCol(this);
@@ -183,25 +226,29 @@ $(".input-cell").mousemove(function (e) {
 
 $(".input-cell").mouseenter(function (e) {
     if (e.buttons == 1) {
-        if(e.pageX < $(window).width()-10 && scrollXrStarted){
+        if (e.pageX < $(window).width() - 10 && scrollXrStarted) {
             clearInterval(scrollXrInterval);
             scrollXrStarted = false;
         }
-        if(e.pageX > 10 && scrollXlStarted){
+        if (e.pageX > 10 && scrollXlStarted) {
             clearInterval(scrollXlInterval);
             scrollXlStarted = false;
         }
 
-        if(e.pageY < $(window).height()-50 && scrollYdStarted){
+        if (e.pageY < $(window).height() - 50 && scrollYdStarted) {
             clearInterval(scrollYdInterval);
             scrollYdStarted = false;
+        }
+
+        if (e.pageY > 190 && scrollYuStarted) {
+            clearInterval(scrollYuInterval);
+            scrollYuStarted = false;
         }
 
 
         let [rowId, colId] = getRowCol(this);
         endCell = { "rowId": rowId, "colId": colId };
         selectAllBetweenCells(startCell, endCell);
-        console.log(endCell);
     }
 })
 
@@ -222,51 +269,106 @@ function selectAllBetweenCells(start, end) {
 let scrollXrInterval;
 let scrollXlInterval;
 let scrollYdInterval;
-function scrollXR(){
+let scrollYuInterval;
+function scrollXR() {
     scrollXrStarted = true;
     scrollXrInterval = setInterval(() => {
         $("#cells").scrollLeft($("#cells").scrollLeft() + 100);
 
-    },100);
+    }, 100);
 }
-function scrollXL(){
+function scrollXL() {
     scrollXlStarted = true;
     scrollXlInterval = setInterval(() => {
         $("#cells").scrollLeft($("#cells").scrollLeft() - 100);
 
-    },100);
+    }, 100);
 }
-function scrollYD(){
+function scrollYD() {
     scrollYdStarted = true;
     scrollYdInterval = setInterval(() => {
         $("#cells").scrollTop($("#cells").scrollTop() + 50);
 
-    },100);
+    }, 100);
+
+}
+function scrollYU() {
+    scrollYuStarted = true;
+    scrollYuInterval = setInterval(() => {
+        $("#cells").scroll($("#cells").scroll() + 50);
+
+    }, 100);
 
 }
 
-$(".data-container").mousemove(function(e){
+$(".data-container").mousemove(function (e) {
     if (e.buttons == 1) {
-        if(e.pageX > ($(window).width()) - 10 && !scrollXrStarted){
-                  scrollXR();
+        if (e.pageX > ($(window).width()) - 10 && !scrollXrStarted) {
+            scrollXR();
 
-        }else if(e.pageX < 10 && !scrollXlStarted){
+        } else if (e.pageX < 10 && !scrollXlStarted) {
             scrollXL();
         }
 
-        
-    
+
+
     }
 })
 
 
-$(".data-container").mouseup(function(e){
+$(".data-container").mouseup(function (e) {
     console.log("hello");
     clearInterval(scrollXrInterval);
     clearInterval(scrollXlInterval);
     clearInterval(scrollYdInterval);
+    clearInterval(scrollYuInterval);
+    scrollYuStarted = false;
     scrollYdStarted = false;
     scrollXlStarted = false;
     scrollXrStarted = false;
 });
 
+$(".alignment").click(function (e) {
+    let alingment = $(this).attr("data-type");
+    $(".alignment.selected").removeClass("selected");
+    $(this).addClass("selected");
+    $(".input-cell.selected").css("text-align", alingment);
+    $(".input-cell.selected").each(function (index, data) {
+        let [rowId, colId] = getRowCol(data);
+        cellData[rowId - 1][colId - 1].alingment = alingment;
+    })
+});
+
+$("#bold").click(function(e){
+    setStyle(this,"bold","font-weight","bold");
+ 
+});
+$("#italic").click(function(e){
+    setStyle(this,"italic","font-style","italic");
+ 
+});
+$("#underlined").click(function(e){
+    setStyle(this,"underlined","text-decoration","underline");
+ 
+});
+
+function setStyle(ele,property,key,value){
+    if($(ele).hasClass("selected")){
+        $(ele).removeClass("selected");
+        $(".input-cell.selected").css(key,"");
+        $(".input-cell.selected").each(function (index, data) {
+            let [rowId, colId] = getRowCol(data);
+            cellData[rowId - 1][colId - 1][property]= false;
+        })
+
+
+    }else{
+        $(ele).addClass("selected");
+       
+        $(".input-cell.selected").css(key,value);
+        $(".input-cell.selected").each(function (index, data) {
+            let [rowId, colId] = getRowCol(data);
+            cellData[rowId - 1][colId - 1][property] = true;             //not .property as its a variable and with . its considered as a key
+        })
+    }
+}

@@ -171,7 +171,7 @@ overflow:hidden;
     min-width: 100px;
     display: flex;
     align-items: center;
-    font-weight: 600;
+    font-weight: bold;
     justify-content: center;
     border-right: 1px solid lightgray;
     height: 100%;
@@ -211,6 +211,7 @@ overflow:hidden;
 }
 .input-cell.selected{
      border: 2px solid #217346;
+     
 
 }
 
@@ -227,4 +228,7 @@ overflow:hidden;
     border-right: 1px solid lightgray;
 }
 
-
+.menu-icon.selected{
+    background-color: lightgray;
+}
+.input-cell:hover {cursor: cell;}
