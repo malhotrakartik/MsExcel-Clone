@@ -1,0 +1,11 @@
+[33mcommit 2458c570baa2a7848bd7e4ca386d0851c10b502a[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Kartik Malhotra <kartikmalhotra448@gmail.com>
+Date:   Thu May 13 22:04:13 2021 +0530
+
+    bold italic underline working
+
+[33mcommit 8132388054c13d5a2c56d9484518db604f51f394[m
+Author: Kartik Malhotra <kartikmalhotra448@gmail.com>
+Date:   Thu May 13 17:21:22 2021 +0530
+
+    page scrolling left and right added

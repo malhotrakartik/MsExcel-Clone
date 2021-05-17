@@ -18,6 +18,11 @@ for (let i = 1; i <= 100; i++) {
 }
 
 let cellData = [];
+// let cellData = {
+//     "Sheet1" : {}
+// }
+// let selectedSheet = "Sheet1";
+// let totalSheets = 1;
 
 for (let i = 1; i <= 100; i++) {
     let row = $(`<div class="cell-row"></div>`)
@@ -168,9 +173,11 @@ function changeHeader([rowId, colId]) {
   addRemoveSelectFromFontStyle(data,"italic");
 
   addRemoveSelectFromFontStyle(data,"underlined");  
-  console.log(data); 
   $("#fill-color").css("border-bottom",`4px solid ${data.bgcolor}`);
   $("#text-color").css("border-bottom",`4px solid ${data.color}`);
+  $("#font-family").val(data["font-family"]);
+  $("#font-size").val(data["font-size"]);
+  $("#font-family").css("font-family",data["font-family"]);
 }
 
 function addRemoveSelectFromFontStyle(data,property){
@@ -417,4 +424,21 @@ $(".pick-color").colorPick({
     setTimeout(()=>{
              $(this).parent().click();
     },10);
+});
+$(".menu-selector").change(function(e){
+    let value = $(this).val();
+    let key = $(this).attr("id");
+    if(key == "font-family"){
+        $("#font-family").css(key,value);
+
+    }
+    if(!isNaN(value)){
+        value = parseInt(value);
+    }
+    $(".input-cell.selected").css(key,value);
+    $(".input-cell.selected").each((index,data)=>{
+        let [rowId,colId] = getRowCol(data);
+        cellData[rowId-1][colId-1][key] = value;
+    })
+
 })
