@@ -17,34 +17,34 @@ for (let i = 1; i <= 100; i++) {
     $("#rows").append(`<div class="row-name">${i}</div>`)
 }
 
-let cellData = [];
-// let cellData = {
-//     "Sheet1" : {}
-// }
-// let selectedSheet = "Sheet1";
-// let totalSheets = 1;
+// let cellData = [];
+let cellData = {
+    "Sheet1": {}
+}
+let selectedSheet = "Sheet1";
+let totalSheets = 1;
+
+let defaultProperties = {
+    "font-family": "Noto Sans",
+    "font-size": 14,
+    "text": "",
+    "bold": false,
+    "italic": false,
+    "underlined": false,
+    "alingment": "left",
+    "color": "#444",
+    "bgcolor": "#fff"
+};
 
 for (let i = 1; i <= 100; i++) {
     let row = $(`<div class="cell-row"></div>`)
-    let rowArray = [];
 
     for (let j = 1; j <= 100; j++) {
 
         row.append($(` <div id="row-${i}-col-${j}" class="input-cell" contenteditable="false"></div>`));
-        rowArray.push({
-            "font-family": "Noto Sans",
-            "font-size": 14,
-            "text": "",
-            "bold": false,
-            "italic": false,
-            "underlined": false,
-            "alingment": "left",
-            "color": "#444",
-            "bgcolor": "#fff"
-        })
+
 
     }
-    cellData.push(rowArray);
     $("#cells").append(row);
 }
 
@@ -63,6 +63,7 @@ $(".input-cell").dblclick(function (e) {
 
 $(".input-cell").blur(function (e) {
     $(this).attr("contenteditable", "false");
+    updateCellData("text",$(this).text());
 })
 
 function getRowCol(ele) {
@@ -165,25 +166,31 @@ function selectCell(ele, e, topCell, bottomCell, leftCell, rightCell) {
 }
 
 function changeHeader([rowId, colId]) {
-    let data = cellData[rowId - 1][colId - 1];
+    let data;
+    if(cellData[selectedSheet][rowId-1] && cellData[selectedSheet][rowId-1][colId-1]){
+         data = cellData[selectedSheet][rowId-1][colId-1];
+    }else{
+        data = defaultProperties;
+
+    }
     $(".alignment.selected").removeClass("selected");
     $(`.alignment[data-type = ${data.alingment}]`).addClass("selected");
-   
-  addRemoveSelectFromFontStyle(data,"bold");
-  addRemoveSelectFromFontStyle(data,"italic");
 
-  addRemoveSelectFromFontStyle(data,"underlined");  
-  $("#fill-color").css("border-bottom",`4px solid ${data.bgcolor}`);
-  $("#text-color").css("border-bottom",`4px solid ${data.color}`);
-  $("#font-family").val(data["font-family"]);
-  $("#font-size").val(data["font-size"]);
-  $("#font-family").css("font-family",data["font-family"]);
+    addRemoveSelectFromFontStyle(data, "bold");
+    addRemoveSelectFromFontStyle(data, "italic");
+
+    addRemoveSelectFromFontStyle(data, "underlined");
+    $("#fill-color").css("border-bottom", `4px solid ${data.bgcolor}`);
+    $("#text-color").css("border-bottom", `4px solid ${data.color}`);
+    $("#font-family").val(data["font-family"]);
+    $("#font-size").val(data["font-size"]);
+    $("#font-family").css("font-family", data["font-family"]);
 }
 
-function addRemoveSelectFromFontStyle(data,property){
-    if(data[property]){
+function addRemoveSelectFromFontStyle(data, property) {
+    if (data[property]) {
         $(`#${property}`).addClass("selected");
-    }else{
+    } else {
         $(`#${property}`).removeClass("selected");
 
     }
@@ -336,109 +343,126 @@ $(".data-container").mouseup(function (e) {
 });
 
 $(".alignment").click(function (e) {
+    
     let alingment = $(this).attr("data-type");
     $(".alignment.selected").removeClass("selected");
     $(this).addClass("selected");
     $(".input-cell.selected").css("text-align", alingment);
-    $(".input-cell.selected").each(function (index, data) {
-        let [rowId, colId] = getRowCol(data);
-        cellData[rowId - 1][colId - 1].alingment = alingment;
-    })
+
+   updateCellData("alingment",alingment);
 });
 
-$("#bold").click(function(e){
-    setStyle(this,"bold","font-weight","bold");
- 
+
+$("#bold").click(function (e) {
+    setStyle(this, "bold", "font-weight", "bold");
+
 });
-$("#italic").click(function(e){
-    setStyle(this,"italic","font-style","italic");
- 
+$("#italic").click(function (e) {
+    setStyle(this, "italic", "font-style", "italic");
+
 });
-$("#underlined").click(function(e){
-    setStyle(this,"underlined","text-decoration","underline");
- 
+$("#underlined").click(function (e) {
+    setStyle(this, "underlined", "text-decoration", "underline");
+
 });
 
-function setStyle(ele,property,key,value){
-    if($(ele).hasClass("selected")){
+function setStyle(ele, property, key, value) {
+    if ($(ele).hasClass("selected")) {
         $(ele).removeClass("selected");
-        $(".input-cell.selected").css(key,"");
-        $(".input-cell.selected").each(function (index, data) {
-            let [rowId, colId] = getRowCol(data);
-            cellData[rowId - 1][colId - 1][property]= false;
-        })
+        $(".input-cell.selected").css(key, "");
+        
+        updateCellData(property,false);
 
 
-    }else{
+    } else {
         $(ele).addClass("selected");
-       
-        $(".input-cell.selected").css(key,value);
-        $(".input-cell.selected").each(function (index, data) {
-            let [rowId, colId] = getRowCol(data);
-            cellData[rowId - 1][colId - 1][property] = true;             //not .property as its a variable and with . its considered as a key
-        })
+
+        $(".input-cell.selected").css(key, value);
+        
+        updateCellData(property,true);
     }
 }
 
 
 $(".pick-color").colorPick({
-    'initial-color' : '#abcd',
+    'initial-color': '#abcd',
     'allowRecent': true,
     'recentMax': 5,
     'allowCustomColor': true,
     'palette': ["#1abc9c", "#16a085", "#2ecc71", "#27ae60", "#3498db", "#2980b9", "#9b59b6", "#8e44ad", "#34495e", "#2c3e50", "#f1c40f", "#f39c12", "#e67e22", "#d35400", "#e74c3c", "#c0392b", "#ecf0f1", "#bdc3c7", "#95a5a6", "#7f8c8d"],
-    'onColorSelected': function() {
-         if(this.color != '#ABCD'){
-             if($(this.element.children()[1]).attr("id") == "fill-color"){
-                 $(".input-cell.selected").css("backgroundColor",this.color);
-                 $("#fill-color").css("border-bottom",`4px solid ${this.color}`);
-                 $(".input-cell.selected").each((index,data) => {
-                     let [rowId,colId] = getRowCol(data);
-                     
-                     cellData[rowId-1][colId-1].bgcolor = this.color;
-
-
-                 })
-             }
-             if($(this.element.children()[1]).attr("id") == "text-color"){
-                $(".input-cell.selected").css("color",this.color);
-                $("#text-color").css("border-bottom",`4px solid ${this.color}`);
-                $(".input-cell.selected").each((index,data) => {
-                    let [rowId,colId] = getRowCol(data);
-                    cellData[rowId-1][colId-1].color = this.color;
-                    
-
-                })
+    'onColorSelected': function () {
+        if (this.color != '#ABCD') {
+            if ($(this.element.children()[1]).attr("id") == "fill-color") {
+                $(".input-cell.selected").css("backgroundColor", this.color);
+                $("#fill-color").css("border-bottom", `4px solid ${this.color}`);
+                
+                updateCellData("bgcolor",this.color);
+            }
+            if ($(this.element.children()[1]).attr("id") == "text-color") {
+                $(".input-cell.selected").css("color", this.color);
+                $("#text-color").css("border-bottom", `4px solid ${this.color}`);
+               
+                updateCellData("color",this.color)
 
             }
-         }
+        }
     }
-  });
-
-  $("#fill-color").click(function(e){
-       setTimeout(()=>{
-                $(this).parent().click();
-       },10);
-  })
-  $("#text-color").click(function(e){
-    setTimeout(()=>{
-             $(this).parent().click();
-    },10);
 });
-$(".menu-selector").change(function(e){
+
+$("#fill-color").click(function (e) {
+    setTimeout(() => {
+        $(this).parent().click();
+    }, 10);
+})
+$("#text-color").click(function (e) {
+    setTimeout(() => {
+        $(this).parent().click();
+    }, 10);
+});
+$(".menu-selector").change(function (e) {
     let value = $(this).val();
     let key = $(this).attr("id");
-    if(key == "font-family"){
-        $("#font-family").css(key,value);
+    if (key == "font-family") {
+        $("#font-family").css(key, value);
 
     }
-    if(!isNaN(value)){
+    if (!isNaN(value)) {
         value = parseInt(value);
     }
-    $(".input-cell.selected").css(key,value);
-    $(".input-cell.selected").each((index,data)=>{
-        let [rowId,colId] = getRowCol(data);
-        cellData[rowId-1][colId-1][key] = value;
-    })
+    $(".input-cell.selected").css(key, value);
+  
+    updateCellData(key,value);
 
 })
+
+function updateCellData(property,value){
+    if (value != defaultProperties[property]) {
+        $(".input-cell.selected").each(function (index, data) {
+            let [rowId, colId] = getRowCol(data);
+            if (cellData[selectedSheet][rowId - 1] == undefined) {
+                cellData[selectedSheet][rowId - 1] = {};
+                cellData[selectedSheet][rowId - 1][colId - 1] = { ...defaultProperties };
+                cellData[selectedSheet][rowId - 1][colId - 1][property] = value;
+            } else {
+                if (cellData[selectedSheet][rowId - 1][colId - 1] == undefined) {
+                    cellData[selectedSheet][rowId - 1][colId - 1] = { ...defaultProperties };
+                    cellData[selectedSheet][rowId - 1][colId - 1][property] = value;
+
+                } else {
+                    cellData[selectedSheet][rowId - 1][colId - 1][property] = value;
+
+                }
+            }
+        })
+    } else {
+        $(".input-cell.selected").each(function (index, data) {
+            let [rowId, colId] = getRowCol(data);
+            if (cellData[selectedSheet][rowId - 1][colId - 1] != undefined) {
+                cellData[selectedSheet][rowId-1][colId - 1][property] = value;
+                if (JSON.stringify(cellData[selectedSheet][rowId-1][colId - 1]) == JSON.stringify(defaultProperties)) {
+                    delete cellData[selectedSheet][rowId-1][colId - 1];
+                }
+            }
+        })
+    }
+}
