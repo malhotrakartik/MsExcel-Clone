@@ -11,6 +11,7 @@ body{
     background-color: white;
     height: 100vh;
     color: #444;
+    position: relative;
 }
 .title{
     background-color: #217346;
@@ -131,7 +132,7 @@ overflow:hidden;
 .data-container{
     display: flex;
     flex-direction: row;
-    height: 76vh;
+    height: 75vh;
     flex-wrap: wrap;
 }
 #select-all{
@@ -152,7 +153,7 @@ overflow:hidden;
 
 }
 #rows{
-    height: calc(76vh - 25px);
+    height: calc(75vh - 25px);
     width: 25px;
     border: 1px solid lightgray;
     overflow: hidden;
@@ -161,7 +162,7 @@ overflow:hidden;
 
 #cells{
     position: relative;
-    height: calc(76vh - 25px);
+    height: calc(75vh - 25px);
     width: calc(100vw - 25px);
     border: 1px solid lightgray;
     /* overflow:scroll; */
@@ -240,4 +241,84 @@ overflow:hidden;
 #text-color{
     border-bottom : 4px solid #444;
     padding-bottom : 2px;
+}
+.sheet-bar{
+    display: flex;
+    height: 4vh;
+    width: 100vw;
+    align-items: center;
+}
+
+.sheet-scroller{
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+}
+.sheet-tab-container{
+    display: flex;
+    border-left:1px solid lightgray;
+    overflow: scroll;
+
+}
+.sheet-tab-container::-webkit-scrollbar{
+    display: none;
+}
+.sheet-tab-container{
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.sheet-tab{
+    display: flex;
+    justify-content: center;
+    padding-left: 10px;
+    padding-top: 3px;
+    height: 4vh;
+    padding-right: 10px;
+    border-right: 1px solid lightgray;
+    font-weight: 600;
+    font-size: 14px;
+}
+.sheet-tab.selected{
+    color: #217346;
+    border-bottom: 5px solid green;
+}
+.sheet-tab:hover{
+    background-color: lightgray;
+    cursor: pointer;
+}
+.sheet-tab.selected:hover{
+    background-color: #fff;
+    cursor: default;
+}
+.add-sheet{
+    color: #217346;
+    margin-right: 10px;
+}
+.add-sheet:hover{
+    cursor: pointer;
+    transform: scale(1.2);
+}
+.sheet-options-modal{
+    position:absolute;
+   
+    box-shadow: 0 8px 16px rgb(0 0 0 / 10%);
+    background-color: #fff;
+    bottom: 5vh;
+    left: 200px;
+}
+.option{
+    padding:7px 15px 7px 15px;
+    
+}
+.option:hover{
+    background-color: lightgray;
+    cursor: default;
+}
+.scroller{
+    font-size: 28px;
+}
+.scroller:hover{
+    cursor: pointer;
+    background-color: lightgray;
 }

@@ -23,6 +23,7 @@ let cellData = {
 }
 let selectedSheet = "Sheet1";
 let totalSheets = 1;
+let lastlyAddedSheet = 1;
 
 let defaultProperties = {
     "font-family": "Noto Sans",
@@ -457,12 +458,117 @@ function updateCellData(property,value){
     } else {
         $(".input-cell.selected").each(function (index, data) {
             let [rowId, colId] = getRowCol(data);
-            if (cellData[selectedSheet][rowId - 1][colId - 1] != undefined) {
+            if (cellData[selectedSheet][rowId - 1] && cellData[selectedSheet][rowId - 1][colId - 1] ) {
                 cellData[selectedSheet][rowId-1][colId - 1][property] = value;
                 if (JSON.stringify(cellData[selectedSheet][rowId-1][colId - 1]) == JSON.stringify(defaultProperties)) {
                     delete cellData[selectedSheet][rowId-1][colId - 1];
+                    if(Object.keys(cellData[selectedSheet][rowId-1]).length == 0){
+                        delete cellData[selectedSheet][rowId]-1;
+                    }
                 }
             }
         })
     }
+}
+
+function addSheetEvents(){
+
+    $(".sheet-tab.selected").on("contextmenu",function(e){          //if context menu opens runs this function
+        e.preventDefault();
+        $(".sheet-options-modal").remove();
+        let modal = $(`<div class="sheet-options-modal">
+        <div class="option sheet-rename">
+            Rename
+        </div>
+        <div class="option sheet-delete">
+            Delete
+        </div>
+    </div>`);
+    modal.css({"left":e.pageX});
+    $(".container").append(modal);
+    
+    
+    });
+
+    
+$(".sheet-tab.selected").click(function(e){
+    $(".sheet-tab.selected").removeClass("selected");
+    $(this).addClass("selected");
+    selectSheet();
+})
+}
+addSheetEvents();
+
+
+
+$(".add-sheet").click(function(e){
+    lastlyAddedSheet++;
+    totalSheets++;
+    cellData[`Sheet${lastlyAddedSheet}`] = {};
+    $(".sheet-tab.selected").removeClass("selected");
+    $(".sheet-tab-container").append(`  <div class="sheet-tab selected">Sheet${lastlyAddedSheet}</div>
+    `);
+    selectSheet();
+    addSheetEvents();
+
+})
+
+
+function selectSheet(){
+    emptyPreviousSheet();
+    selectedSheet = $(".sheet-tab.selected").text();
+    loadCurrentSheet();
+    $("#row-1-col-1").click();
+
+
+}
+function emptyPreviousSheet(){
+    let data = cellData[selectedSheet];
+    let rowKeys = Object.keys(data);
+    for(let i of rowKeys){
+        let rowId = parseInt(i);
+        let colKeys = Object.keys(data[rowId]);
+        console.log(colKeys,rowKeys);
+        for(let j of colKeys){
+            let colId = parseInt(j);
+            let cell = $(`#row-${rowId+1}-col-${colId+1}`);
+            console.log(cell);
+            cell.text("");
+            cell.css({
+            "font-family": "Noto Sans",
+            "font-size": 14,
+            "color" : "#444" ,
+            "font-weight" : "",
+            "font-style" : "", 
+            "text-align": "left",
+            "text-decoration" :"",
+            "background-color": "#fff"});
+        }
+    }
+}
+
+function loadCurrentSheet(){
+    let data = cellData[selectedSheet];
+    let rowKeys = Object.keys(data);
+    for(let i of rowKeys){
+        let rowId = parseInt(i);
+        let colKeys = Object.keys(data[rowId]);
+        console.log(colKeys,rowKeys);
+        for(let j of colKeys){
+            let colId = parseInt(j);
+            let cell = $(`#row-${rowId+1}-col-${colId+1}`);
+            
+            cell.text(data[rowId][colId].text);
+            cell.css({
+            "font-family": data[rowId][colId]["font-family"],
+            "font-size": data[rowId][colId]["font-size"],
+            "color" : data[rowId][colId].color ,
+            "font-weight" : data[rowId][colId].bold ? "bold" : "",
+            "font-style" : data[rowId][colId].italic ? "italic" : "", 
+            "text-align": data[rowId][colId].alingment,
+            "text-decoration" :data[rowId][colId].underlined ? "underline" : "",
+            "background-color": data[rowId][colId]["bgcolor"]});
+        }
+    }
+
 }
