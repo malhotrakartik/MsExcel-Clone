@@ -471,10 +471,18 @@ function updateCellData(property,value){
     }
 }
 
+$(".container").click(function(e){
+    $(".sheet-options-modal").remove();
+
+})
+
 function addSheetEvents(){
 
     $(".sheet-tab.selected").on("contextmenu",function(e){          //if context menu opens runs this function
         e.preventDefault();
+
+            selectSheet(this);
+        
         $(".sheet-options-modal").remove();
         let modal = $(`<div class="sheet-options-modal">
         <div class="option sheet-rename">
@@ -486,18 +494,87 @@ function addSheetEvents(){
     </div>`);
     modal.css({"left":e.pageX});
     $(".container").append(modal);
+    $(".sheet-rename").click(function(e){
+        console.log("hey there");
+        let renameModal = $(`<div class="sheet-modal-parent">
+        <div class="sheet-rename-modal">
+            <div class="sheet-modal-title">Rename Sheet</div>
+            <div class="sheet-modal-input-container">
+                <span class="sheet-modal-input-title">Rename Sheet to : </span>
+                <input class="sheet-modal-input" type="text">
+            </div>
+            <div class="sheet-modal-confirmation">
+                <div class="button yes-button">OK</div>
+                <div class="button no-button">Cancel</div>
+            </div>
+        </div>
+    </div>`);
+    $(".container").append(renameModal);
+    $(".sheet-modal-input").focus();
+    $(".no-button").click(function(e){
+        $(".sheet-modal-parent").remove();
+    });
+    $(".yes-button").click(function(e){
+        renameSheet();
+    });
+    $(".sheet-modal-input").keypress(function(e){
+        if(e.key == "Enter"){
+            renameSheet();
+        }
+    })
+
+
+    });
+    $(".sheet-delete").click(function(e){
+        if(totalSheets > 1){
+            let deleteModal = $(`<div class="sheet-modal-parent">
+            <div class="sheet-delete-modal">
+                <div class="sheet-modal-title">Delete Sheet</div>
+                <div class="sheet-modal-detail-container">
+                    <div class="sheet-modal-detail-title">Are You Sure?</div>
+                </div>
+                <div class="sheet-modal-confirmation">
+    
+                    <div class=" button yes-button">
+                        <div class="material-icons delete-icon">delete</div>
+                        Delete
+                        </div>
+                    <div class="button no-button">Cancel</div>
+                </div>
+            </div>
+        </div>`);
+        $(".container").append(deleteModal);
+        $(".no-button").click(function(e){
+            $(".sheet-modal-parent").remove();
+        });
+        $(".yes-button").click(function(e){
+            deleteSheet();
+        })
+        
+        }else{
+            let alertModal = $(`<div class="sheet-modal-parent">
+            <div class="alert-modal-delete">
+            Sorry,Not Possible</div></div>`);
+            $(".container").append(alertModal);
+            setTimeout(function(e){
+                 alertModal.remove();
+            },1000)
+        }
+        
+    })
     
     
     });
 
     
 $(".sheet-tab.selected").click(function(e){
-    $(".sheet-tab.selected").removeClass("selected");
-    $(this).addClass("selected");
-    selectSheet();
+
+        selectSheet(this);
+    
+  
 })
 }
-addSheetEvents();
+ addSheetEvents();
 
 
 
@@ -514,11 +591,16 @@ $(".add-sheet").click(function(e){
 })
 
 
-function selectSheet(){
+function selectSheet(ele){
+    if(ele && !$(ele).hasClass("selected")){
+        $(".sheet-tab.selected").removeClass("selected");
+        $(ele).addClass("selected");
+    }
     emptyPreviousSheet();
     selectedSheet = $(".sheet-tab.selected").text();
     loadCurrentSheet();
     $("#row-1-col-1").click();
+    
 
 
 }
@@ -570,5 +652,46 @@ function loadCurrentSheet(){
             "background-color": data[rowId][colId]["bgcolor"]});
         }
     }
+
+}
+
+function renameSheet(){
+    let newSheetName = $(".sheet-modal-input").val();
+    if(newSheetName && !Object.keys(cellData).includes(newSheetName)){
+        let newCellData = {};
+        for(let i of Object.keys(cellData)){
+            if(i == selectedSheet){
+                newCellData[newSheetName] = cellData[selectedSheet];
+            }else{
+                newCellData[i] = cellData[i];
+            }
+        }
+        cellData = newCellData;
+    
+        selectedSheet = newSheetName;
+        $(".sheet-tab.selected").text(newSheetName);
+        $(".sheet-modal-parent").remove();
+        console.log(cellData);
+    }else{
+        $(".rename-error").remove();
+        $(".sheet-modal-input-container").append(`<div class="rename-error">
+        Sheet name not valid or Sheet already exists!!
+        </div>`)
+    }
+
+}
+
+function deleteSheet(){
+    $(".sheet-modal-parent").remove();
+    let sheetIndex = Object.keys(cellData).indexOf(selectedSheet);
+    let currentSelectedSheet = $(".sheet-tab.selected");
+    if(sheetIndex == 0){
+          selectSheet(currentSelectedSheet.next()[0]);
+    }else{
+        selectSheet(currentSelectedSheet.prev()[0]);
+    }
+    delete cellData[currentSelectedSheet.text()];
+    currentSelectedSheet.remove();
+    totalSheets--;
 
 }
