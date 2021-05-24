@@ -24,6 +24,7 @@ let cellData = {
 let selectedSheet = "Sheet1";
 let totalSheets = 1;
 let lastlyAddedSheet = 1;
+let saved = true;
 
 let defaultProperties = {
     "font-family": "Noto Sans",
@@ -437,6 +438,7 @@ $(".menu-selector").change(function (e) {
 })
 
 function updateCellData(property, value) {
+    let currentCellData = JSON.stringify(cellData);
     if (value != defaultProperties[property]) {
         $(".input-cell.selected").each(function (index, data) {
             let [rowId, colId] = getRowCol(data);
@@ -468,6 +470,9 @@ function updateCellData(property, value) {
                 }
             }
         })
+    }
+    if(saved == true && currentCellData != JSON.stringify(cellData)){
+        saved = false;
     }
 }
 
@@ -529,7 +534,7 @@ function addSheetEvents() {
             if (totalSheets > 1) {
                 let deleteModal = $(`<div class="sheet-modal-parent">
             <div class="sheet-delete-modal">
-                <div class="sheet-modal-title">Delete Sheet</div>
+                <div class="sheet-modal-title">${selectedSheet}</div>
                 <div class="sheet-modal-detail-container">
                     <div class="sheet-modal-detail-title">Are You Sure?</div>
                 </div>
@@ -588,6 +593,7 @@ $(".add-sheet").click(function (e) {
     selectSheet();
     addSheetEvents();
     $(".sheet-tab.selected")[0].scrollIntoView();
+    saved = false;
 
 
 })
@@ -662,6 +668,8 @@ function loadCurrentSheet() {
 function renameSheet() {
     let newSheetName = $(".sheet-modal-input").val();
     if (newSheetName && !Object.keys(cellData).includes(newSheetName)) {
+        saved = false;
+
         let newCellData = {};
         for (let i of Object.keys(cellData)) {
             if (i == selectedSheet) {
@@ -779,7 +787,7 @@ $(".container").append(fileModal);
 fileModal.animate({
     width: "100vw"
 },300);
-$(".close,.file-transparent").click(function(e){
+$(".close,.file-transparent,.new,.save").click(function(e){
     fileModal.animate({
         width: "0vw"
     },300)
@@ -789,7 +797,97 @@ $(".close,.file-transparent").click(function(e){
     },300);
 })
 
+$(".new").click(function(e){
+    console.log("jay baat");
+    if(JSON.stringify(cellData) == `{Sheet1 : {}}`){
+       newFile();
+    }else{
+        $(".container").append(`  <div class="sheet-modal-parent">
+        <div class="sheet-delete-modal">
+            <div class="sheet-modal-title">${$(".title").text()}</div>
+            <div class="sheet-modal-detail-container">
+                <div class="sheet-modal-detail-title">Do you want to save changes?</div>
+            </div>
+            <div class="sheet-modal-confirmation">
+
+                <div class=" button yes-button">
+                    Yes
+                    </div>
+                <div class="button no-button">No</div>
+            </div>
+        </div>
+    </div>`);
+
+    $(".no-button").click(function(e){
+        $(".sheet-modal-parent").remove();
+        newFile();
+
+    })
+    $(".yes-button").click(function(e){
+        saveFile();
+        $(".sheet-modal-parent").remove();
+        newFile();
 })
+
+    }
+   
+   
+})
+
+$(".save").click(()=>{
+    saveFile();
+})
+
+})
+
+function newFile(){
+    emptyPreviousSheet();
+    cellData = {"Sheet1" : {}};
+    $(".sheet-tab").remove();
+    $(".sheet-tab-container").append(`<div class="sheet-tab selected">Sheet1</div>`);
+    addSheetEvents();
+    selectedSheet = "Sheet1";
+    $(".title").text("Excel-Book");
+    $("#row-1-col-1").click();
+    totalSheets = 0;
+    lastlyAddedSheet = 1;
+}
+
+
+
+function saveFile(){
+    $(".container").append(`   <div class="sheet-modal-parent">
+    <div class="sheet-rename-modal">
+        <div class="sheet-modal-title">Save File</div>
+        <div class="sheet-modal-input-container">
+            <span class="sheet-modal-input-title">File Name: </span>
+            <input class="sheet-modal-input" value="${$(".title").text()}" type="text">
+        </div>
+        <div class="sheet-modal-confirmation">
+            <div class="button yes-button">Save</div>
+            <div class="button no-button">Cancel</div>
+        </div>
+    </div>
+</div>`)
+
+$(".no-button").click(function(e){
+    $(".sheet-modal-parent").remove();
+
+})
+$(".yes-button").click(function(e){
+    let a = document.createElement("a");
+    a.href = `data:application/json,${encodeURIComponent(JSON.stringify(cellData))}`;
+    a.download = `${$(".sheet-modal-input").val()+".json"}`;
+    $(".container").append(a);
+    a.click();
+    // a.remove();
+    $(".sheet-modal-parent").remove();
+    saved = true;
+})
+
+}
+
+
 
 
 
