@@ -471,7 +471,7 @@ function updateCellData(property, value) {
             }
         })
     }
-    if(saved == true && currentCellData != JSON.stringify(cellData)){
+    if (saved == true && currentCellData != JSON.stringify(cellData)) {
         saved = false;
     }
 }
@@ -644,7 +644,6 @@ function loadCurrentSheet() {
     for (let i of rowKeys) {
         let rowId = parseInt(i);
         let colKeys = Object.keys(data[rowId]);
-        console.log(colKeys, rowKeys);
         for (let j of colKeys) {
             let colId = parseInt(j);
             let cell = $(`#row-${rowId + 1}-col-${colId + 1}`);
@@ -711,13 +710,13 @@ function deleteSheet() {
 $(".left-scroller,.right-scroller").click(function (e) {
     let keysArrays = Object.keys(cellData);
     let selectedSheetIndex = keysArrays.indexOf(selectSheet);
-    if($(this).text() == "arrow_left"){
-        if(selectedSheetIndex != 0){
+    if ($(this).text() == "arrow_left") {
+        if (selectedSheetIndex != 0) {
             selectSheet($(".sheet-tab.selected").prev()[0]);
 
         }
-    }else{
-        if(selectedSheetIndex != keysArrays.length-1){
+    } else {
+        if (selectedSheetIndex != keysArrays.length - 1) {
             selectSheet($(".sheet-tab.selected").next()[0]);
 
         }
@@ -727,7 +726,7 @@ $(".left-scroller,.right-scroller").click(function (e) {
 
 });
 
-$("#file").click(function(e){
+$("#file").click(function (e) {
     let modal = $(`       <div class="home-modal">
     <div class="home-modal-left">
         <div class="home-modal-left-top">
@@ -753,12 +752,12 @@ $("#file").click(function(e){
     <div class="home-modal-right">jsfkjsakf</div>
 </div>`)
     $(".container").append(modal);
-    $(".back-button").click(function(e){
+    $(".back-button").click(function (e) {
         $(".home-modal").remove();
     })
 
 })
-$("#menu-file").click(function(e){
+$("#menu-file").click(function (e) {
     let fileModal = $(`     
     <div class="file-modal">
         <div class="file-options-modal">
@@ -783,66 +782,91 @@ $("#menu-file").click(function(e){
         <div class="file-transparent"></div>
     </div>
 `);
-$(".container").append(fileModal);
-fileModal.animate({
-    width: "100vw"
-},300);
-$(".close,.file-transparent,.new,.save").click(function(e){
+    $(".container").append(fileModal);
     fileModal.animate({
-        width: "0vw"
-    },300)
-    setTimeout(function(e){
-        fileModal.remove();
+        width: "100vw"
+    }, 300);
+    $(".close,.file-transparent,.new,.save,.open").click(function (e) {
+        fileModal.animate({
+            width: "0vw"
+        }, 300)
+        setTimeout(function (e) {
+            fileModal.remove();
 
-    },300);
-})
+        }, 300);
+    })
 
-$(".new").click(function(e){
-    console.log("jay baat");
-    if(JSON.stringify(cellData) == `{Sheet1 : {}}`){
-       newFile();
-    }else{
-        $(".container").append(`  <div class="sheet-modal-parent">
-        <div class="sheet-delete-modal">
-            <div class="sheet-modal-title">${$(".title").text()}</div>
-            <div class="sheet-modal-detail-container">
-                <div class="sheet-modal-detail-title">Do you want to save changes?</div>
-            </div>
-            <div class="sheet-modal-confirmation">
-
-                <div class=" button yes-button">
-                    Yes
+    $(".new").click(function (e) {
+        if (JSON.stringify(cellData) == `{Sheet1 : {}}`) {
+            newFile();
+        } else {
+           
+                $(".container").append(`  <div class="sheet-modal-parent">
+                <div class="sheet-delete-modal">
+                    <div class="sheet-modal-title">${$(".title").text()}</div>
+                    <div class="sheet-modal-detail-container">
+                        <div class="sheet-modal-detail-title">Do you want to save changes?</div>
                     </div>
-                <div class="button no-button">No</div>
-            </div>
-        </div>
-    </div>`);
+                    <div class="sheet-modal-confirmation">
+        
+                        <div class=" button yes-button">
+                            Yes
+                            </div>
+                        <div class="button no-button">No</div>
+                    </div>
+                </div>
+            </div>`);
+            // $(".sheet-modal-parent").click();
+            // $(".sheet-modal-parent").keydown(function(e){
+            //     console.log("hello");
+            //     if(e.key == "Enter"){
+            //         console.log("hello");
 
-    $(".no-button").click(function(e){
-        $(".sheet-modal-parent").remove();
-        newFile();
+            //         $(".yes-button").click();
+            //     }
+            // })
+           
+
+                    $(".no-button").click(function (e) {
+                        $(".sheet-modal-parent").remove();
+                        newFile();
+        
+                    })
+                    
+                    $(".yes-button").click(function (e) {
+                        $(".sheet-modal-parent").remove();
+                        if(!saved){
+                            saveFile(true);
+
+                        }else{
+                            newFile();
+                        }
+                    })
+        
+                }
+
 
     })
-    $(".yes-button").click(function(e){
-        saveFile();
-        $(".sheet-modal-parent").remove();
-        newFile();
+
+    $(".save").click(() => {
+        if (!saved) {
+            saveFile();
+
+        }else{
+            alert("already saved");
+        }
+    })
+
+    $(".open").click((e)=>{
+        openFile();
+
+    })
+
 })
 
-    }
-   
-   
-})
-
-$(".save").click(()=>{
-    saveFile();
-})
-
-})
-
-function newFile(){
+function newFile() {
     emptyPreviousSheet();
-    cellData = {"Sheet1" : {}};
+    cellData = { "Sheet1": {} };
     $(".sheet-tab").remove();
     $(".sheet-tab-container").append(`<div class="sheet-tab selected">Sheet1</div>`);
     addSheetEvents();
@@ -855,7 +879,9 @@ function newFile(){
 
 
 
-function saveFile(){
+function saveFile(newClicked) {
+    console.log("yes way")
+
     $(".container").append(`   <div class="sheet-modal-parent">
     <div class="sheet-rename-modal">
         <div class="sheet-modal-title">Save File</div>
@@ -869,23 +895,116 @@ function saveFile(){
         </div>
     </div>
 </div>`)
-
-$(".no-button").click(function(e){
-    $(".sheet-modal-parent").remove();
-
+$(".sheet-modal-input").focus();
+$(".sheet-modal-input").keypress(function (e) {
+    if (e.key == "Enter") {
+       $(".yes-button").click();
+    }
 })
-$(".yes-button").click(function(e){
-    let a = document.createElement("a");
-    a.href = `data:application/json,${encodeURIComponent(JSON.stringify(cellData))}`;
-    a.download = `${$(".sheet-modal-input").val()+".json"}`;
-    $(".container").append(a);
-    a.click();
-    // a.remove();
-    $(".sheet-modal-parent").remove();
-    saved = true;
-})
+
+    $(".no-button").click(function (e) {
+        $(".sheet-modal-parent").remove();
+        if (newClicked) {
+            newFile();
+        }
+
+    })
+    $(".yes-button").click(function (e) {
+        let a = document.createElement("a");
+        a.href = `data:application/json,${encodeURIComponent(JSON.stringify(cellData))}`;
+        a.download = `${$(".sheet-modal-input").val() + ".json"}`;
+        $(".container").append(a);
+        a.click();
+        // a.remove();
+        $(".sheet-modal-parent").remove();
+        saved = true;
+        if (newClicked) {
+            newFile();
+        }
+    })
 
 }
+
+function openFile(){
+    let inputFile = $(`<input accept="application/json" type="file" />`);
+    $(".container").append(inputFile);
+    inputFile.click();
+    inputFile.change(function(e){
+        let file = e.target.files[0];
+        $(".title").text(file.name.split(".json")[0]);
+        let reader = new FileReader();
+        reader.readAsText(file);
+        reader.onload = () => {
+            emptyPreviousSheet();
+            $(".sheet-tab").remove();
+            cellData = JSON.parse(reader.result);
+            let sheets = Object.keys(cellData);
+            lastlyAddedSheet = 1;
+            for(i of sheets){
+                if(i.includes("Sheet")){
+                    let splittedSheetArray = i.split("Sheet")
+                        if(splittedSheetArray.length == 2 && !isNaN(splittedSheetArray[1])){
+                            lastlyAddedSheet = parseInt(splittedSheetArray);
+                        }
+                    
+                }
+                $(".sheet-tab-container").append($(`<div class="sheet-tab selected">${i}</div>`));
+            }
+            addSheetEvents();
+            $(".sheet-tab").removeClass("selected");
+            $($(".sheet-tab")[0]).addClass("selected");
+            selectedSheet = sheets[0];
+            totalSheets = sheets.length;
+            loadCurrentSheet();
+            inputFile.remove();
+            saved = true;
+        }
+
+    })
+}
+
+let clipBoard = {startCell : [],cellData : {}};
+$("#copy").click(function(e){
+    clipBoard = {startCell : [],cellData : {}};
+
+    let [rowId,colId] = getRowCol($(".input-cell.selected")[0]);
+    clipBoard.startCell = [rowId,colId];
+    $(".input-cell.selected").each(function(index,data){
+        let [rowId,colId] = getRowCol(data);
+        if(cellData[selectedSheet][rowId-1] && cellData[selectedSheet][rowId-1][colId-1]){
+            if(!clipBoard.cellData[rowId]){
+                clipBoard.cellData[rowId] = {};
+            }
+            clipBoard.cellData[rowId][colId] = {...cellData[selectedSheet][rowId-1][colId-1]};
+        }
+
+    })
+})
+
+$("#paste").click(function(e){
+    console.log(clipBoard);
+    let startCell = getRowCol($(".input-cell.selected")[0]);
+    let rows = Object.keys(clipBoard.cellData);
+    for(let i of rows){
+        let cols = Object.keys(clipBoard.cellData[i]);
+        for(let j of cols){
+            let rowDistance = parseInt(i) - parseInt(clipBoard.startCell[0]);
+            let colDistance = parseInt(j) - parseInt(clipBoard.startCell[1]);
+            if(!cellData[selectedSheet][startCell[0] + rowDistance-1]){
+                cellData[selectedSheet][startCell[0] + rowDistance-1] = {};
+            }
+            cellData[selectedSheet][startCell[0] + rowDistance-1][startCell[1] + colDistance-1] = {...clipBoard.cellData[i][j]}
+
+
+
+        }
+    }
+    loadCurrentSheet();
+})
+
+
+
+
 
 
 
